@@ -1,0 +1,52 @@
+name: Auto Blog Posts
+
+on:
+  schedule:
+    # Each cron string below must match a "cron" value in config/schedules.json (UTC).
+    - cron: '0 6 * * *'      # morning-tech
+    - cron: '0 12 * * *'     # midday-keywords
+    - cron: '0 18 * * 1-5'   # evening-world (weekdays)
+  workflow_dispatch:
+    inputs:
+      schedule_id:
+        description: 'Schedule id from config/schedules.json, or "all"'
+        default: all
+      dry_run:
+        description: 'Generate only, do not publish or save history'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autopost
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Generate and publish
+        run: node scripts/autopost.mjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+          BLOGGER_CLIENT_ID: ${{ secrets.BLOGGER_CLIENT_ID }}
+          BLOGGER_CLIENT_SECRET: ${{ secrets.BLOGGER_CLIENT_SECRET }}
+          BLOGGER_REFRESH_TOKEN: ${{ secrets.BLOGGER_REFRESH_TOKEN }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
+          SCHEDULE_ID: ${{ github.event.inputs.schedule_id }}
+          DRY_RUN: ${{ github.event.inputs.dry_run }}
+      - name: Save post history
+        if: always()
+        run: |
+          git config user.name "autopost-bot"
+          git config user.email "autopost-bot@users.noreply.github.com"
+          git add data/history.json
+          git diff --cached --quiet || (git commit -m "chore: update post history" && git push)
