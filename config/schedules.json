@@ -1,0 +1,52 @@
+{
+  "site": "connect360",
+  "disclosure": "Compiled with AI assistance from the news reports listed below.",
+  "defaults": {
+    "language": "English",
+    "hl": "en-US",
+    "geo": "US",
+    "mode": "trends",
+    "categories": ["News", "Tech", "Business", "Entertainment", "Sports", "Deals", "Guide"],
+    "minTraffic": 200,
+    "maxPosts": 2,
+    "maxAgeHours": 24,
+    "relatedCount": 6,
+    "minRelated": 2,
+    "dedupeDays": 7,
+    "delayMs": 8000,
+    "draft": false,
+    "grounding": false,
+    "models": ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"],
+    "blockWords": ["porn", "nude", "sex tape", "suicide", "obituary", "rape", "died"],
+    "fallbackImages": ["https://picsum.photos/seed/{seed}/1200/630"]
+  },
+  "schedules": [
+    {
+      "id": "morning-tech",
+      "cron": "0 6 * * *",
+      "mode": "trends",
+      "geo": "US",
+      "categories": ["Tech", "Business", "News"],
+      "minTraffic": 500,
+      "maxPosts": 2
+    },
+    {
+      "id": "midday-keywords",
+      "cron": "0 12 * * *",
+      "mode": "keywords",
+      "keywords": ["AI tools", "smartphone deals", "crypto market", "remote jobs"],
+      "categories": ["Tech", "Deals", "Business", "Guide"],
+      "maxAgeHours": 72,
+      "maxPosts": 1
+    },
+    {
+      "id": "evening-world",
+      "cron": "0 18 * * 1-5",
+      "mode": "trends",
+      "geo": "GB",
+      "hl": "en-GB",
+      "categories": ["News", "Entertainment", "Sports"],
+      "maxPosts": 2
+    }
+  ]
+}
